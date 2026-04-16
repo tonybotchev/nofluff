@@ -1,0 +1,6 @@
+# Obsidian workspace files (user-specific, not shareable)
+workspace.json
+workspace-mobile.json
+
+# Plugin data that may contain local paths
+plugins/*/data.json
