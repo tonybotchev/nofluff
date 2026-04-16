@@ -1,42 +1,29 @@
-# Welcome to Your Digital Brain
+# Start Here
 
-This is your **No Fluff Marketing** knowledge base powered by Obsidian.
+> Head to **[[Home]]** — your main dashboard for navigating everything.
 
-## How This Vault Is Organized
+## Quick Reference
 
-This vault follows the **PARA method** (Projects, Areas, Resources, Archive):
+| Shortcut | Action |
+|---|---|
+| `Ctrl/Cmd + O` | Quick switch between notes |
+| `Ctrl/Cmd + P` | Command palette |
+| `Ctrl/Cmd + Shift + F` | Search entire vault |
+| `[[double brackets]]` | Link notes together |
+
+## Vault Structure
 
 | Folder | Purpose |
 |---|---|
 | **00-Inbox** | Capture everything here first. Process later. |
 | **01-Projects** | Active projects with a clear goal and deadline. |
-| **02-Areas** | Ongoing areas of responsibility (marketing, clients, ops). |
+| **02-Areas** | Ongoing areas of responsibility. |
 | **03-Resources** | Reference material, frameworks, swipe files. |
-| **04-Archive** | Completed or inactive items. Move things here, don't delete. |
-| **Templates** | Reusable templates for notes, meetings, content ideas. |
-| **Attachments** | Images and file attachments. |
-
-## Getting Started
-
-1. Open this folder as a vault in Obsidian (File > Open Vault > select `brain/`)
-2. New notes land in `00-Inbox` by default - process them into the right folder later
-3. Use `[[double brackets]]` to link notes together - this builds your knowledge graph
-4. Use `Ctrl/Cmd + P` to open the command palette
-5. Use `Ctrl/Cmd + O` to quick-switch between notes
-6. Use daily notes (`Ctrl/Cmd + D` if configured) for daily logs
-
-## Available Templates
-
-- **Daily Note** - Daily priorities, notes, and review
-- **Project** - Track projects with objectives and key results
-- **Meeting Note** - Structured meeting notes with action items
-- **Content Idea** - Plan content with hooks, key points, and CTAs
-
-Use `Ctrl/Cmd + P` > "Insert template" to apply a template to any note.
+| **04-Archive** | Completed or inactive items. |
+| **Templates** | Reusable note templates. |
 
 ## Tips
 
-- **Link liberally** - The more you link, the more useful the graph becomes
-- **Tags** - Use tags like `#idea`, `#client`, `#campaign` for filtering
-- **Don't overthink** - Capture first, organize later
-- **Review weekly** - Process your Inbox and update projects
+- **Link liberally** — the more you link, the more useful the graph becomes
+- **Capture first, organize later** — drop things in Inbox, sort them when you're ready
+- **Review weekly** — process Inbox and update [[Projects Dashboard]]
