@@ -5,60 +5,115 @@ tags: [nav, tools]
 
 # External Tools
 
-> Quick links to all your tools in one place. [[Home|Back to Home]]
+> Quick links to all your tools. [[Home|Back to Home]] | [[Tech Stack|Integration Map]] | [[Workflows|SOPs]]
 
 ---
 
-## Notion
+## CRM & Marketing
+
+### GoHighLevel (GHL)
 
 | | |
 |---|---|
-| **Workspace** | [Open Notion](https://notion.so) |
-| **What lives here** | *Add what you keep in Notion (e.g., databases, client portals, CRM)* |
+| **App** | [Open GHL](https://app.gohighlevel.com) |
+| **Role** | CRM, funnels, pipelines, automations, client comms |
 
-### Key Notion Pages
-
-> Add direct links to your most-used Notion pages:
-
-- [Page name](https://notion.so/your-page-link)
-- 
-
----
-
-## Google Drive
+### Instantly
 
 | | |
 |---|---|
-| **Drive** | [Open Google Drive](https://drive.google.com) |
-| **What lives here** | *Add what you keep in Drive (e.g., client files, contracts, assets)* |
+| **App** | [Open Instantly](https://app.instantly.ai) |
+| **Role** | Cold email outreach and lead generation |
 
-### Key Drive Folders
+### Zo
 
-> Add direct links to your most-used Drive folders:
-
-- [Folder name](https://drive.google.com/drive/folders/your-folder-id)
-- 
+| | |
+|---|---|
+| **App** | *Add link* |
+| **Role** | *Define role* |
 
 ---
 
-## GitHub
+## Communication
+
+### Gmail
+
+| | |
+|---|---|
+| **App** | [Open Gmail](https://mail.google.com) |
+| **Role** | Email, client communication, follow-ups |
+
+---
+
+## Project Management & Knowledge
+
+### Notion
+
+| | |
+|---|---|
+| **App** | [Open Notion](https://notion.so) |
+| **Role** | Projects, databases, client portals, SOPs |
+
+> Key pages — add your direct links:
+> - [Page name](https://notion.so/your-page)
+
+### Google Drive
+
+| | |
+|---|---|
+| **App** | [Open Google Drive](https://drive.google.com) |
+| **Role** | Files, contracts, assets, shared docs |
+
+> Key folders — add your direct links:
+> - [Folder name](https://drive.google.com/drive/folders/your-folder-id)
+
+---
+
+## AI Tools
+
+### Claude Code
+
+| | |
+|---|---|
+| **App** | CLI / IDE / Web |
+| **Role** | Dev, automations, technical buildout, integrations |
+
+### Grok
+
+| | |
+|---|---|
+| **App** | [Open Grok](https://grok.x.ai) |
+| **Role** | Research, trend analysis, content ideation |
+
+### Manus
+
+| | |
+|---|---|
+| **App** | [Open Manus](https://manus.im) |
+| **Role** | Autonomous AI agents for delegated tasks |
+
+---
+
+## Automation
+
+### Axiom
+
+| | |
+|---|---|
+| **App** | [Open Axiom](https://axiom.ai) |
+| **Role** | Browser automation, scraping, repetitive tasks |
+
+---
+
+## Dev & Code
+
+### GitHub
 
 | | |
 |---|---|
 | **Repo** | [tonybotchev/nofluff](https://github.com/tonybotchev/nofluff) |
-| **What lives here** | Website code, this Obsidian vault |
+| **Role** | Website code, Obsidian vault, version control |
 
 ---
 
-## Other Tools
-
-> Add any other tools you use regularly:
-
-| Tool | Link | Purpose |
-|---|---|---|
-| Canva | [Open Canva](https://canva.com) | Design & graphics |
-| | | |
-
----
-
-*Tip: Replace the placeholder links above with your actual workspace URLs. Obsidian will open them directly in your browser when clicked.*
+*Replace placeholder links with your actual workspace URLs. Clicking them in Obsidian opens your browser directly.*

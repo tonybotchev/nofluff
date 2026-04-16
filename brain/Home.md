@@ -16,7 +16,9 @@ tags: [nav]
 | **[[Projects Dashboard]]** | Active projects & status |
 | **[[Areas Dashboard]]** | Ongoing areas of focus |
 | **[[Resources Dashboard]]** | Frameworks, references, swipe files |
-| **[[External Tools]]** | Notion, Google Drive, other tools |
+| **[[Tech Stack]]** | All tools & how they connect |
+| **[[Workflows]]** | Step-by-step processes & SOPs |
+| **[[External Tools]]** | Quick links to all your tools |
 
 ---
 
@@ -44,9 +46,14 @@ tags: [nav]
 
 | Tool | Link |
 |---|---|
-| **Notion** | [Open Notion Workspace](https://notion.so) |
+| **GHL** | [Open GoHighLevel](https://app.gohighlevel.com) |
+| **Notion** | [Open Notion](https://notion.so) |
+| **Instantly** | [Open Instantly](https://app.instantly.ai) |
+| **Gmail** | [Open Gmail](https://mail.google.com) |
 | **Google Drive** | [Open Google Drive](https://drive.google.com) |
-| **GitHub Repo** | [tonybotchev/nofluff](https://github.com/tonybotchev/nofluff) |
+| **GitHub** | [tonybotchev/nofluff](https://github.com/tonybotchev/nofluff) |
+
+See **[[Tech Stack]]** for full integration map and **[[Workflows]]** for SOPs.
 
 ---
 

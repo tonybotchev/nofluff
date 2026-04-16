@@ -14,13 +14,18 @@ tags: [nav, dashboard]
 - [[Content Strategy]] — Pillars, platforms, calendar, metrics
 - [[Brand Guidelines]] — Voice, visuals, messaging
 
+## Tech & Operations
+
+- [[Tech Stack]] — All tools, integration map, setup checklist
+- [[Workflows]] — Step-by-step processes and SOPs
+
 ## Clients
 
 > Add client notes here as you grow.
 
 ## Operations
 
-> Business processes, SOPs, admin.
+> Business processes, admin, finance.
 
 ---
 
