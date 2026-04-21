@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 96" role="img" aria-label="NoFluff Marketing">
+  <title>NoFluff Marketing</title>
+  <g>
+    <rect x="6" y="16" width="64" height="64" rx="10" fill="#111111"/>
+    <path d="M20 60 L20 36 L36 36 L48 52 L48 36 L56 36 L56 60 L40 60 L28 44 L28 60 Z" fill="#FFFFFF"/>
+    <path d="M56 28 L62 28 L62 34 L56 34 Z" fill="#E05A1A"/>
+    <path d="M56 40 L66 40 L62 48 L58 44 Z" fill="#E05A1A"/>
+    <path d="M62 28 L72 38 L66 44 L60 38 Z" fill="#E05A1A"/>
+  </g>
+  <g font-family="'Barlow Condensed','Arial Narrow',Arial,sans-serif" font-weight="800" letter-spacing="2">
+    <text x="88" y="56" font-size="38" fill="#FFFFFF">NO</text>
+    <text x="148" y="56" font-size="38" fill="#E05A1A">FLUFF</text>
+    <text x="88" y="78" font-size="13" fill="#BBBBBB" letter-spacing="4">MARKETING · DFW</text>
+  </g>
+</svg>
