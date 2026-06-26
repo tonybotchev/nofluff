@@ -1,0 +1,79 @@
+# Hermes — OpenRouter Model Routing
+# Provider: OpenRouter (https://openrouter.ai)
+# All models accessed via OpenAI-compatible API at https://openrouter.ai/api/v1
+
+provider: openrouter
+base_url: https://openrouter.ai/api/v1
+api_key: "${OPENROUTER_API_KEY}"
+
+# Default model for general operations
+default: google/gemini-2.5-flash
+
+# --- Model Tiers ---
+#
+# Tier 1 — Strategic
+#   Use for: complex workflow planning, multi-step automation design,
+#            full GHL state analysis, autonomous onboarding sequences
+#   Model:   google/gemini-2.5-pro
+#   Why:     1M+ token context, strongest reasoning, reliable tool use
+#
+# Tier 2 — Operations (default)
+#   Use for: GHL API calls via MCP, CRM actions, pipeline management,
+#            contact operations, workflow execution — the daily driver
+#   Model:   google/gemini-2.5-flash
+#   Why:     Fast, cheap, excellent tool calling, handles high-volume ops
+#
+# Tier 3 — Content
+#   Use for: SMS copy, email drafts, workflow message templates,
+#            review responses, client-facing communication
+#   Model:   anthropic/claude-sonnet-4-5
+#   Why:     Best writing quality for client-facing messages
+#
+# Tier 4 — Fast
+#   Use for: Quick status lookups, simple data queries,
+#            contact existence checks, tag reads
+#   Model:   meta-llama/llama-4-scout
+#   Why:     Near-instant response, very low cost, good enough for simple ops
+
+models:
+  strategic:  google/gemini-2.5-pro
+  operations: google/gemini-2.5-flash
+  content:    anthropic/claude-sonnet-4-5
+  fast:       meta-llama/llama-4-scout
+
+# --- Task → Model Routing ---
+routing:
+  # Planning & design
+  workflow_planning:        strategic
+  automation_design:        strategic
+  onboarding_sequence:      strategic
+  pipeline_architecture:    strategic
+
+  # Live GHL operations
+  contact_create:           operations
+  contact_update:           operations
+  opportunity_manage:       operations
+  workflow_trigger:         operations
+  appointment_book:         operations
+  invoice_create:           operations
+  campaign_launch:          operations
+  webhook_response:         operations
+
+  # Writing & communication
+  sms_draft:                content
+  email_draft:              content
+  workflow_message:         content
+  review_response:          content
+  voice_script:             content
+
+  # Quick lookups
+  contact_search:           fast
+  pipeline_status:          fast
+  tag_check:                fast
+  contact_exists:           fast
+
+# --- OpenRouter Settings ---
+openrouter:
+  site_url: https://nofluffmarketing.com
+  site_name: Hermes — NFM/DHL GHL Operator
+  # Enables OpenRouter ranking and usage tracking under your account
