@@ -1,0 +1,38 @@
+{
+  "mcpServers": {
+    "ghl-nfm": {
+      "command": "node",
+      "args": ["${HOME}/.hermes/mcp-servers/ghl/dist/index.js"],
+      "env": {
+        "GHL_API_KEY": "${GHL_NFM_API_KEY}",
+        "GHL_LOCATION_ID": "tRk2nBMoIkO6EhFzr7jp",
+        "GHL_BASE_URL": "https://services.leadconnectorhq.com",
+        "GHL_API_VERSION": "2023-02-21",
+        "GHL_TOOL_PROFILE": "curated"
+      }
+    },
+    "ghl-dhl": {
+      "command": "node",
+      "args": ["${HOME}/.hermes/mcp-servers/ghl/dist/index.js"],
+      "env": {
+        "GHL_API_KEY": "${GHL_DHL_API_KEY}",
+        "GHL_LOCATION_ID": "Jatw8uCMjEcPeIHP2M2z",
+        "GHL_BASE_URL": "https://services.leadconnectorhq.com",
+        "GHL_API_VERSION": "2023-02-21",
+        "GHL_TOOL_PROFILE": "curated"
+      }
+    }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(node *)",
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(git clone *)",
+      "Bash(git pull *)",
+      "Bash(curl *:https://services.leadconnectorhq.com/*)",
+      "Bash(curl *:https://api.gohighlevel.com/*)",
+      "Bash(hermes *)"
+    ]
+  }
+}

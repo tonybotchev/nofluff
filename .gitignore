@@ -1,0 +1,15 @@
+# Environment — never commit secrets
+.env
+.env.local
+.env.*.local
+
+# MCP servers — cloned externally by setup script
+mcp-servers/
+
+# Node
+node_modules/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
