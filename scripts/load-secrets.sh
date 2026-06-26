@@ -27,7 +27,7 @@ echo "  GHL_DHL_LOCATION_ID: $GHL_DHL_LOCATION_ID"
 
 # OpenRouter — Primary LLM provider for Hermes
 export OPENROUTER_API_KEY
-OPENROUTER_API_KEY=$(op item get 'OpenRouter API Key' --fields label=password --reveal)
+OPENROUTER_API_KEY=$(op item get 'OpenRouterAPI' --fields label=password --reveal)
 echo "  OPENROUTER_API_KEY: loaded"
 
 # Optional: GHL Agency key (uncomment if stored in 1Password)
