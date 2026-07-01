@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Menu, X, Phone } from "lucide-react";
+import { Menu, X, Phone, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { PHONE, PHONE_DISPLAY } from "@/lib/schema";
@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { to: "/listing-sentinel", label: "Listing Sentinel" },
   { to: "/#pricing", label: "Pricing" },
   { to: "/about", label: "About" },
+  { to: "/email-agent", label: "Email Agent", icon: Bot },
 ];
 
 export function Navbar() {
@@ -82,11 +83,13 @@ export function Navbar() {
                 to={link.to}
                 className={({ isActive }) =>
                   cn(
-                    "text-sm font-medium uppercase tracking-[0.12em] transition-colors hover:text-white",
-                    isActive ? "text-white" : "text-ink-200"
+                    "flex items-center gap-1.5 text-sm font-medium uppercase tracking-[0.12em] transition-colors hover:text-white",
+                    isActive ? "text-white" : "text-ink-200",
+                    link.icon && "text-texas-500 hover:text-texas-400"
                   )
                 }
               >
+                {link.icon && <link.icon className="size-3.5" />}
                 {link.label}
               </NavLink>
             )

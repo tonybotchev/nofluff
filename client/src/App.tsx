@@ -8,6 +8,7 @@ import ListingSentinelPage from "@/pages/ListingSentinelPage";
 import About from "@/pages/About";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
+import EmailAgent from "@/pages/EmailAgent";
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/email-agent" element={<EmailAgent />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </main>

@@ -1,0 +1,13 @@
+{
+  "name": "nofluff-email-agent",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Autonomous email agent for NoFluff Marketing",
+  "scripts": {
+    "start": "node email-agent.mjs",
+    "watch": "node email-agent.mjs --watch"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}
