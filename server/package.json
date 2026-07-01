@@ -1,13 +1,14 @@
 {
   "name": "nofluff-email-agent",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
-  "description": "Autonomous email agent for NoFluff Marketing",
+  "description": "Autonomous AI email agent for NoFluff Marketing",
   "scripts": {
-    "start": "node email-agent.mjs",
-    "watch": "node email-agent.mjs --watch"
+    "start": "node agent.mjs",
+    "dev": "node --watch agent.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
     "dotenv": "^16.4.5"
   }
 }

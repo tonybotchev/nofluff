@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Mail,
   MailOpen,
@@ -11,44 +11,31 @@ import {
   AlertCircle,
   ChevronRight,
   Inbox,
-  Clock,
   Tag,
   ExternalLink,
   Bot,
   Shield,
   Briefcase,
   Bell,
-  Trash2,
   Search,
+  Calendar,
+  Clock,
+  Trash2,
+  Sparkles,
+  WifiOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-type Account = {
-  id: string;
-  name: string;
-  email: string;
-  provider: "outlook" | "gmail";
-  unread: number;
-  connected: boolean;
-};
-
-type EmailCategory =
-  | "lead"
-  | "client"
-  | "domain"
-  | "admin"
-  | "newsletter"
-  | "support"
-  | "other";
-
-type EmailStatus = "unread" | "draft-ready" | "approved" | "no-reply";
+type EmailCategory = "lead" | "client" | "domain" | "admin" | "newsletter" | "support" | "other";
+type EmailStatus = "draft-ready" | "sent" | "no-reply" | "skipped";
 
 type Email = {
   id: string;
   accountId: string;
+  rawId: string;
   from: string;
   fromName: string;
   subject: string;
@@ -60,183 +47,66 @@ type Email = {
   priority: "high" | "medium" | "low";
   draft?: string;
   webLink?: string;
+  sentAt?: string;
+  processedAt?: string;
 };
 
-type Domain = {
-  name: string;
-  status: "active" | "expiring" | "available" | "unknown";
-  expires?: string;
+type CalendarEvent = {
+  id: string;
+  subject: string;
+  start: { dateTime: string; timeZone: string };
+  end: { dateTime: string; timeZone: string };
+  location?: { displayName?: string };
+  organizer?: { emailAddress?: { name?: string } };
+  isOnlineMeeting?: boolean;
+  onlineMeetingUrl?: string;
+  bodyPreview?: string;
 };
 
-// ─── Static seed data (mirrors live Outlook + Gmail inboxes) ─────────────────
-
-const ACCOUNTS: Account[] = [
-  {
-    id: "outlook",
-    name: "Tony Botchev",
-    email: "tony@nofluffmarketing.onmicrosoft.com",
-    provider: "outlook",
-    unread: 5,
-    connected: true,
-  },
-  {
-    id: "gmail",
-    name: "DFW Home Loans",
-    email: "info@dfwhome.loans",
-    provider: "gmail",
-    unread: 0,
-    connected: true,
-  },
-];
-
-const INITIAL_EMAILS: Email[] = [
-  {
-    id: "1",
-    accountId: "outlook",
-    from: "msonlineservicesteam@microsoftonline.com",
-    fromName: "Microsoft Online",
-    subject: "Your NoFluff Marketing LLC password has been reset",
-    snippet:
-      "The password on your account has recently been reset. If you performed this password reset, then this message is for your information only.",
-    receivedAt: "2026-06-30T01:51:27Z",
-    category: "admin",
-    status: "no-reply",
-    priority: "low",
-  },
-  {
-    id: "2",
-    accountId: "outlook",
-    from: "o365mc@microsoft.com",
-    fromName: "Microsoft 365",
-    subject: "Weekly digest: Microsoft service updates",
-    snippet:
-      "As a new admin to the Microsoft 365 admin center, you'll get weekly emails from the message center about upcoming changes to your services.",
-    receivedAt: "2026-06-29T09:51:38Z",
-    category: "newsletter",
-    status: "no-reply",
-    priority: "low",
-  },
-  {
-    id: "3",
-    accountId: "outlook",
-    from: "MSSecurity-noreply@microsoft.com",
-    fromName: "Microsoft Security",
-    subject: "Security recommendation: Do not allow users to grant consent to unreliable applications",
-    snippet:
-      "You have a new recommendation for NoFluff Marketing LLC. See why this recommendation was generated for your tenant and how to remediate it.",
-    receivedAt: "2026-06-22T00:36:14Z",
-    category: "admin",
-    status: "draft-ready",
-    priority: "medium",
-    draft:
-      "Thank you for the security recommendation. I have reviewed the guidance regarding application consent policies and will implement the recommended restrictions in the Microsoft Entra admin center. This aligns with our security posture for NoFluff Marketing LLC.",
-  },
-  {
-    id: "4",
-    accountId: "outlook",
-    from: "MSSecurity-noreply@microsoft.com",
-    fromName: "Microsoft Security",
-    subject: "Security recommendation: Designate more than one global admin",
-    snippet:
-      "You have a new recommendation for NoFluff Marketing LLC. Designate more than one global admin. See why this recommendation was generated.",
-    receivedAt: "2026-06-22T00:36:14Z",
-    category: "admin",
-    status: "no-reply",
-    priority: "medium",
-  },
-  {
-    id: "5",
-    accountId: "outlook",
-    from: "MicrosoftExchange329e71ec88ae4615bbc36ab6ce41109e@nofluffmarketing.io",
-    fromName: "Mail Delivery",
-    subject: "Undeliverable: test — info@nofluffmarketing.io not found",
-    snippet:
-      "Your message to info@nofluffmarketing.io couldn't be delivered. info wasn't found at nofluffmarketing.io. The address may be misspelled.",
-    receivedAt: "2026-06-19T01:57:19Z",
-    category: "admin",
-    status: "draft-ready",
-    priority: "high",
-    draft:
-      "Action needed: The email address info@nofluffmarketing.io is not yet configured. Please set up the mailbox in Microsoft 365 admin center or update the MX records for nofluffmarketing.io to ensure email delivery works correctly for the domain.",
-  },
-];
-
-const DOMAINS: Domain[] = [
-  { name: "dfwhome.loans", status: "active", expires: "2027-03-15" },
-  { name: "nofluffmarketing.io", status: "active", expires: "2027-01-22" },
-  { name: "nofluffmarketing.onmicrosoft.com", status: "active" },
-];
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-const CATEGORY_META: Record<
-  EmailCategory,
-  { label: string; color: string; icon: React.ElementType }
-> = {
-  lead: { label: "Lead", color: "text-texas-500 bg-texas-500/10 border-texas-500/20", icon: Briefcase },
-  client: { label: "Client", color: "text-blue-400 bg-blue-400/10 border-blue-400/20", icon: MailOpen },
-  domain: { label: "Domain", color: "text-purple-400 bg-purple-400/10 border-purple-400/20", icon: Globe },
-  admin: { label: "Admin", color: "text-ink-200 bg-white/5 border-white/10", icon: Shield },
-  newsletter: { label: "Newsletter", color: "text-ink-200 bg-white/5 border-white/10", icon: Bell },
-  support: { label: "Support", color: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20", icon: AlertCircle },
-  other: { label: "Other", color: "text-ink-200 bg-white/5 border-white/10", icon: Tag },
+type AgentState = {
+  emails: Email[];
+  calendar: CalendarEvent[];
+  lastRun: string | null;
+  error: string | null;
+  agentRunning: boolean;
 };
 
-const STATUS_META: Record<EmailStatus, { label: string; dot: string }> = {
-  unread: { label: "Unread", dot: "bg-texas-500" },
-  "draft-ready": { label: "Draft Ready", dot: "bg-blue-400" },
-  approved: { label: "Sent", dot: "bg-green-500" },
-  "no-reply": { label: "No Reply", dot: "bg-ink-200/40" },
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const CATEGORY_META: Record<EmailCategory, { label: string; color: string; icon: React.ElementType }> = {
+  lead:       { label: "Lead",       color: "text-texas-500 bg-texas-500/10 border-texas-500/20",  icon: Briefcase },
+  client:     { label: "Client",     color: "text-blue-400 bg-blue-400/10 border-blue-400/20",     icon: MailOpen  },
+  domain:     { label: "Domain",     color: "text-purple-400 bg-purple-400/10 border-purple-400/20", icon: Globe   },
+  admin:      { label: "Admin",      color: "text-ink-200 bg-white/5 border-white/10",             icon: Shield    },
+  newsletter: { label: "Newsletter", color: "text-ink-200 bg-white/5 border-white/10",             icon: Bell      },
+  support:    { label: "Support",    color: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20", icon: AlertCircle },
+  other:      { label: "Other",      color: "text-ink-200 bg-white/5 border-white/10",             icon: Tag       },
 };
 
 function relativeTime(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
-  const d = Math.floor(diff / 86400000);
-  const h = Math.floor(diff / 3600000);
-  const m = Math.floor(diff / 60000);
+  const d = Math.floor(diff / 86_400_000);
+  const h = Math.floor(diff / 3_600_000);
+  const m = Math.floor(diff / 60_000);
   if (d > 0) return `${d}d ago`;
   if (h > 0) return `${h}h ago`;
   return `${m}m ago`;
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function AccountBadge({ account }: { account: Account }) {
-  return (
-    <div className="flex items-center gap-2">
-      <div
-        className={cn(
-          "size-2 rounded-full",
-          account.connected ? "bg-green-500" : "bg-red-500"
-        )}
-      />
-      <span className="text-xs text-ink-200 truncate max-w-[160px]">
-        {account.email}
-      </span>
-      <span
-        className={cn(
-          "text-xs px-1.5 py-0.5 rounded font-mono",
-          account.provider === "outlook"
-            ? "bg-blue-600/20 text-blue-300"
-            : "bg-red-600/20 text-red-300"
-        )}
-      >
-        {account.provider === "outlook" ? "Outlook" : "Gmail"}
-      </span>
-    </div>
-  );
+function formatEventTime(iso: string) {
+  return new Date(iso).toLocaleString("en-US", {
+    weekday: "short", month: "short", day: "numeric",
+    hour: "numeric", minute: "2-digit",
+  });
 }
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function CategoryBadge({ category }: { category: EmailCategory }) {
   const meta = CATEGORY_META[category];
   const Icon = meta.icon;
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded border font-medium",
-        meta.color
-      )}
-    >
+    <span className={cn("inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded border font-medium", meta.color)}>
       <Icon className="size-3" />
       {meta.label}
     </span>
@@ -245,17 +115,22 @@ function CategoryBadge({ category }: { category: EmailCategory }) {
 
 function PriorityDot({ priority }: { priority: Email["priority"] }) {
   return (
-    <span
-      className={cn("size-2 rounded-full flex-shrink-0", {
-        "bg-texas-500": priority === "high",
-        "bg-yellow-400": priority === "medium",
-        "bg-ink-200/30": priority === "low",
-      })}
-    />
+    <span className={cn("size-2 rounded-full flex-shrink-0 mt-1", {
+      "bg-texas-500": priority === "high",
+      "bg-yellow-400": priority === "medium",
+      "bg-ink-200/30": priority === "low",
+    })} />
   );
 }
 
 // ─── Email List ───────────────────────────────────────────────────────────────
+
+const FILTER_TABS = [
+  { key: "all",         label: "All",    icon: Inbox     },
+  { key: "draft-ready", label: "Drafts", icon: Edit3     },
+  { key: "leads",       label: "Leads",  icon: Briefcase },
+  { key: "sent",        label: "Sent",   icon: Send      },
+] as const;
 
 function EmailList({
   emails,
@@ -269,65 +144,55 @@ function EmailList({
   filter: string;
 }) {
   const visible = emails.filter((e) => {
-    if (filter === "all") return true;
     if (filter === "draft-ready") return e.status === "draft-ready";
-    if (filter === "unread") return e.status === "unread";
-    if (filter === "leads") return e.category === "lead";
+    if (filter === "leads")       return e.category === "lead";
+    if (filter === "sent")        return e.status === "sent";
     return true;
   });
 
+  if (visible.length === 0) {
+    return <div className="py-12 text-center text-ink-200 text-sm">No emails here</div>;
+  }
+
   return (
     <div className="flex flex-col divide-y divide-white/5">
-      {visible.length === 0 && (
-        <div className="py-12 text-center text-ink-200 text-sm">
-          No emails in this view
-        </div>
-      )}
-      {visible.map((email) => {
-        const acc = ACCOUNTS.find((a) => a.id === email.accountId);
-        return (
-          <button
-            key={email.id}
-            onClick={() => onSelect(email.id)}
-            className={cn(
-              "w-full text-left px-4 py-3 hover:bg-white/5 transition-colors group",
-              selected === email.id && "bg-white/5 border-l-2 border-texas-500"
-            )}
-          >
-            <div className="flex items-start gap-3">
-              <PriorityDot priority={email.priority} />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2 mb-0.5">
-                  <span className="text-sm font-medium text-white truncate">
-                    {email.fromName}
-                  </span>
-                  <span className="text-xs text-ink-200 flex-shrink-0">
-                    {relativeTime(email.receivedAt)}
-                  </span>
-                </div>
-                <div className="text-xs text-ink-200 truncate mb-1">
-                  {email.subject}
-                </div>
-                <div className="flex items-center gap-2">
-                  <CategoryBadge category={email.category} />
-                  {email.status === "draft-ready" && (
-                    <span className="text-xs text-blue-400 flex items-center gap-1">
-                      <div className="size-1.5 rounded-full bg-blue-400" />
-                      Draft ready
-                    </span>
-                  )}
-                  {acc && (
-                    <span className="text-xs text-ink-200/60 truncate">
-                      {acc.email.split("@")[1]}
-                    </span>
-                  )}
-                </div>
+      {visible.map((email) => (
+        <button
+          key={email.id}
+          onClick={() => onSelect(email.id)}
+          className={cn(
+            "w-full text-left px-4 py-3 hover:bg-white/5 transition-colors group",
+            selected === email.id && "bg-white/5 border-l-2 border-texas-500"
+          )}
+        >
+          <div className="flex items-start gap-3">
+            <PriorityDot priority={email.priority} />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2 mb-0.5">
+                <span className="text-sm font-medium text-white truncate">{email.fromName}</span>
+                <span className="text-xs text-ink-200 flex-shrink-0">{relativeTime(email.receivedAt)}</span>
               </div>
-              <ChevronRight className="size-4 text-ink-200/40 group-hover:text-ink-200 transition-colors flex-shrink-0 mt-0.5" />
+              <div className="text-xs text-ink-200 truncate mb-1">{email.subject}</div>
+              <div className="flex items-center gap-2">
+                <CategoryBadge category={email.category} />
+                {email.status === "draft-ready" && (
+                  <span className="text-xs text-blue-400 flex items-center gap-1">
+                    <div className="size-1.5 rounded-full bg-blue-400" />
+                    Draft ready
+                  </span>
+                )}
+                {email.status === "sent" && (
+                  <span className="text-xs text-green-400 flex items-center gap-1">
+                    <div className="size-1.5 rounded-full bg-green-400" />
+                    Sent
+                  </span>
+                )}
+              </div>
             </div>
-          </button>
-        );
-      })}
+            <ChevronRight className="size-4 text-ink-200/40 group-hover:text-ink-200 transition-colors flex-shrink-0 mt-0.5" />
+          </div>
+        </button>
+      ))}
     </div>
   );
 }
@@ -338,35 +203,40 @@ function ThreadViewer({
   email,
   onApprove,
   onSkip,
-  onEdit,
+  onRedraft,
 }: {
   email: Email;
-  onApprove: (id: string) => void;
+  onApprove: (id: string, draft: string) => void;
   onSkip: (id: string) => void;
-  onEdit: (id: string, draft: string) => void;
+  onRedraft: (id: string) => void;
 }) {
   const [editMode, setEditMode] = useState(false);
   const [draftText, setDraftText] = useState(email.draft ?? "");
+  const [redrafting, setRedrafting] = useState(false);
 
-  const acc = ACCOUNTS.find((a) => a.id === email.accountId);
+  useEffect(() => {
+    setDraftText(email.draft ?? "");
+    setEditMode(false);
+  }, [email.id, email.draft]);
+
   const catMeta = CATEGORY_META[email.category];
   const CatIcon = catMeta.icon;
+
+  const handleRedraft = async () => {
+    setRedrafting(true);
+    await onRedraft(email.id);
+    setRedrafting(false);
+  };
 
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="p-5 border-b border-white/5">
         <div className="flex items-start justify-between gap-3 mb-3">
-          <h3 className="text-base font-semibold text-white leading-snug">
-            {email.subject}
-          </h3>
+          <h3 className="text-base font-semibold text-white leading-snug">{email.subject}</h3>
           {email.webLink && (
-            <a
-              href={email.webLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-shrink-0 text-ink-200 hover:text-white transition-colors"
-            >
+            <a href={email.webLink} target="_blank" rel="noopener noreferrer"
+               className="flex-shrink-0 text-ink-200 hover:text-white transition-colors">
               <ExternalLink className="size-4" />
             </a>
           )}
@@ -377,44 +247,39 @@ function ThreadViewer({
           <span>·</span>
           <span>{new Date(email.receivedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
           <span>·</span>
-          <span className="flex items-center gap-1">
-            <CatIcon className="size-3" />
-            {catMeta.label}
-          </span>
-          {acc && (
-            <>
-              <span>·</span>
-              <span
-                className={cn(
-                  "px-1.5 py-0.5 rounded font-mono",
-                  acc.provider === "outlook"
-                    ? "bg-blue-600/20 text-blue-300"
-                    : "bg-red-600/20 text-red-300"
-                )}
-              >
-                {acc.provider === "outlook" ? "Outlook" : "Gmail"}
-              </span>
-            </>
-          )}
+          <span className="flex items-center gap-1"><CatIcon className="size-3" />{catMeta.label}</span>
         </div>
       </div>
 
       {/* Body */}
       <div className="p-5 flex-1 overflow-y-auto">
-        <div className="text-sm text-ink-200 leading-relaxed bg-white/3 rounded-lg p-4 border border-white/5">
-          {email.body ?? email.snippet}
+        <div
+          className="text-sm text-ink-200 leading-relaxed bg-white/3 rounded-lg p-4 border border-white/5 max-h-60 overflow-y-auto"
+          dangerouslySetInnerHTML={
+            email.body?.includes("<") ? { __html: email.body } : undefined
+          }
+        >
+          {!email.body?.includes("<") && (email.body ?? email.snippet)}
         </div>
       </div>
 
-      {/* Draft reply */}
-      {email.status === "draft-ready" && email.draft && (
+      {/* Draft panel */}
+      {email.status === "draft-ready" && (
         <div className="border-t border-white/5 p-5">
           <div className="flex items-center gap-2 mb-3">
             <Bot className="size-4 text-texas-500" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-texas-500">
-              AI Draft Reply
-            </span>
-            <span className="ml-auto">
+            <span className="text-xs font-semibold uppercase tracking-wider text-texas-500">AI Draft Reply</span>
+            <div className="ml-auto flex items-center gap-2">
+              <button
+                onClick={handleRedraft}
+                disabled={redrafting}
+                className="text-xs text-ink-200 hover:text-white flex items-center gap-1 transition-colors"
+              >
+                {redrafting
+                  ? <><RefreshCw className="size-3 animate-spin" /> Regenerating…</>
+                  : <><Sparkles className="size-3" /> Regenerate</>
+                }
+              </button>
               <button
                 onClick={() => setEditMode((v) => !v)}
                 className="text-xs text-ink-200 hover:text-white flex items-center gap-1 transition-colors"
@@ -422,18 +287,18 @@ function ThreadViewer({
                 <Edit3 className="size-3" />
                 {editMode ? "Preview" : "Edit"}
               </button>
-            </span>
+            </div>
           </div>
 
           {editMode ? (
             <textarea
               value={draftText}
               onChange={(e) => setDraftText(e.target.value)}
-              rows={5}
+              rows={6}
               className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white resize-none focus:outline-none focus:border-texas-500/50"
             />
           ) : (
-            <div className="bg-white/5 border border-blue-400/20 rounded-lg p-4 text-sm text-ink-200 leading-relaxed">
+            <div className="bg-white/5 border border-blue-400/20 rounded-lg p-4 text-sm text-ink-200 leading-relaxed whitespace-pre-wrap max-h-44 overflow-y-auto">
               {draftText}
             </div>
           )}
@@ -442,23 +307,15 @@ function ThreadViewer({
             <Button
               size="sm"
               className="flex-1 bg-texas-500 hover:bg-texas-500/90 text-white"
-              onClick={() => {
-                if (editMode) onEdit(email.id, draftText);
-                onApprove(email.id);
-              }}
+              onClick={() => onApprove(email.id, draftText)}
             >
               <Check className="size-4 mr-1.5" />
-              Approve & Send
+              Approve &amp; Send
             </Button>
-            <button
-              onClick={() => setEditMode(true)}
-              className="px-3 py-1.5 text-sm text-ink-200 hover:text-white border border-white/10 hover:border-white/20 rounded-md transition-colors"
-            >
-              <Edit3 className="size-4" />
-            </button>
             <button
               onClick={() => onSkip(email.id)}
               className="px-3 py-1.5 text-sm text-ink-200 hover:text-red-400 border border-white/10 hover:border-red-400/30 rounded-md transition-colors"
+              title="Skip / no reply"
             >
               <X className="size-4" />
             </button>
@@ -467,7 +324,7 @@ function ThreadViewer({
       )}
 
       {email.status === "no-reply" && (
-        <div className="border-t border-white/5 p-5">
+        <div className="border-t border-white/5 p-4">
           <div className="flex items-center gap-2 text-sm text-ink-200/60">
             <Check className="size-4 text-green-500/60" />
             Agent marked as no reply needed
@@ -475,11 +332,11 @@ function ThreadViewer({
         </div>
       )}
 
-      {email.status === "approved" && (
-        <div className="border-t border-white/5 p-5">
+      {email.status === "sent" && (
+        <div className="border-t border-white/5 p-4">
           <div className="flex items-center gap-2 text-sm text-green-400">
             <Send className="size-4" />
-            Reply sent
+            Reply sent{email.sentAt ? ` · ${relativeTime(email.sentAt)}` : ""}
           </div>
         </div>
       )}
@@ -487,204 +344,160 @@ function ThreadViewer({
   );
 }
 
-// ─── Domain Manager ───────────────────────────────────────────────────────────
+// ─── Calendar Panel ───────────────────────────────────────────────────────────
 
-function DomainManager() {
-  const [checking, setChecking] = useState(false);
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<null | string>(null);
-
-  const check = () => {
-    if (!query.trim()) return;
-    setChecking(true);
-    setResults(null);
-    setTimeout(() => {
-      setChecking(false);
-      setResults(`Check GoDaddy for "${query}" — domain availability result will appear here.`);
-    }, 1200);
-  };
-
-  const statusColor = (s: Domain["status"]) =>
-    ({
-      active: "text-green-400",
-      expiring: "text-yellow-400",
-      available: "text-blue-400",
-      unknown: "text-ink-200",
-    }[s]);
-
-  return (
-    <div className="rounded-xl border border-white/10 bg-white/3">
-      <div className="px-5 py-4 border-b border-white/5 flex items-center gap-2">
-        <Globe className="size-4 text-texas-500" />
-        <h3 className="text-sm font-semibold text-white uppercase tracking-wider">
-          Domain Manager
-        </h3>
+function CalendarPanel({ events, onDelete }: { events: CalendarEvent[]; onDelete: (id: string) => void }) {
+  if (events.length === 0) {
+    return (
+      <div className="py-10 text-center text-ink-200 text-sm">
+        No upcoming events in the next 14 days
       </div>
-      <div className="p-5">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-          {DOMAINS.map((d) => (
-            <div
-              key={d.name}
-              className="bg-white/5 border border-white/10 rounded-lg px-4 py-3"
-            >
-              <div className="font-mono text-sm text-white mb-1">{d.name}</div>
-              <div className={cn("text-xs capitalize", statusColor(d.status))}>
-                {d.status}
-                {d.expires && (
-                  <span className="ml-1 text-ink-200/60">
-                    · exp {new Date(d.expires).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-                  </span>
-                )}
-              </div>
+    );
+  }
+  return (
+    <div className="divide-y divide-white/5">
+      {events.map((ev) => (
+        <div key={ev.id} className="px-5 py-4 flex items-start gap-4 hover:bg-white/3 transition-colors group">
+          <div className="flex-shrink-0 text-center bg-white/5 rounded-lg px-3 py-2 min-w-[52px]">
+            <div className="text-xs text-ink-200 uppercase">
+              {new Date(ev.start.dateTime).toLocaleDateString("en-US", { month: "short" })}
             </div>
-          ))}
-        </div>
-
-        <div className="flex gap-2">
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && check()}
-            placeholder="Check a new domain (e.g. dfwloans.com)"
-            className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-ink-200/50 focus:outline-none focus:border-texas-500/50"
-          />
-          <Button size="sm" onClick={check} disabled={checking}>
-            {checking ? (
-              <RefreshCw className="size-4 animate-spin" />
-            ) : (
-              <Search className="size-4" />
+            <div className="text-lg font-bold text-white leading-none">
+              {new Date(ev.start.dateTime).getDate()}
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-medium text-white truncate mb-0.5">{ev.subject}</div>
+            <div className="text-xs text-ink-200 flex items-center gap-2">
+              <Clock className="size-3 flex-shrink-0" />
+              {formatEventTime(ev.start.dateTime)}
+              {" — "}
+              {new Date(ev.end.dateTime).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+            </div>
+            {ev.location?.displayName && (
+              <div className="text-xs text-ink-200/60 mt-0.5 truncate">{ev.location.displayName}</div>
             )}
-          </Button>
-        </div>
-        {results && (
-          <div className="mt-3 text-xs text-ink-200 bg-white/5 rounded-lg p-3 border border-white/10">
-            {results}
+            {ev.isOnlineMeeting && ev.onlineMeetingUrl && (
+              <a href={ev.onlineMeetingUrl} target="_blank" rel="noopener noreferrer"
+                 className="text-xs text-blue-400 hover:text-blue-300 mt-0.5 inline-flex items-center gap-1">
+                <ExternalLink className="size-3" /> Join online
+              </a>
+            )}
           </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─── Agent Status Bar ─────────────────────────────────────────────────────────
-
-function AgentStatusBar({
-  emails,
-  running,
-  onRun,
-  lastRun,
-}: {
-  emails: Email[];
-  running: boolean;
-  onRun: () => void;
-  lastRun: string | null;
-}) {
-  const unread = emails.filter((e) => e.status === "unread").length;
-  const drafts = emails.filter((e) => e.status === "draft-ready").length;
-  const approved = emails.filter((e) => e.status === "approved").length;
-
-  return (
-    <div className="rounded-xl border border-white/10 bg-white/3 px-5 py-4 flex flex-wrap items-center gap-6">
-      <div className="flex items-center gap-2">
-        <Bot className="size-5 text-texas-500" />
-        <div>
-          <div className="text-sm font-semibold text-white">Email Agent</div>
-          <div className="text-xs text-ink-200">
-            {lastRun ? `Last run ${relativeTime(lastRun)}` : "Not yet run"}
-          </div>
+          <button
+            onClick={() => onDelete(ev.id)}
+            className="opacity-0 group-hover:opacity-100 text-ink-200/40 hover:text-red-400 transition-all"
+          >
+            <Trash2 className="size-4" />
+          </button>
         </div>
-      </div>
-
-      <div className="flex items-center gap-5 flex-1">
-        <div className="text-center">
-          <div className="text-xl font-bold text-white">{emails.length}</div>
-          <div className="text-xs text-ink-200">Total</div>
-        </div>
-        <div className="text-center">
-          <div className="text-xl font-bold text-texas-500">{unread + drafts}</div>
-          <div className="text-xs text-ink-200">Needs Action</div>
-        </div>
-        <div className="text-center">
-          <div className="text-xl font-bold text-blue-400">{drafts}</div>
-          <div className="text-xs text-ink-200">Drafts Ready</div>
-        </div>
-        <div className="text-center">
-          <div className="text-xl font-bold text-green-400">{approved}</div>
-          <div className="text-xs text-ink-200">Sent</div>
-        </div>
-      </div>
-
-      <Button
-        onClick={onRun}
-        disabled={running}
-        className="bg-texas-500 hover:bg-texas-500/90 text-white"
-      >
-        {running ? (
-          <>
-            <RefreshCw className="size-4 mr-2 animate-spin" />
-            Running…
-          </>
-        ) : (
-          <>
-            <RefreshCw className="size-4 mr-2" />
-            Run Agent
-          </>
-        )}
-      </Button>
+      ))}
     </div>
   );
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
-const FILTER_TABS = [
-  { key: "all", label: "All", icon: Inbox },
-  { key: "draft-ready", label: "Drafts", icon: Edit3 },
-  { key: "unread", label: "Unread", icon: Mail },
-  { key: "leads", label: "Leads", icon: Briefcase },
-] as const;
+const API = "/api";
 
 export default function EmailAgent() {
-  const [emails, setEmails] = useState<Email[]>(INITIAL_EMAILS);
+  const [agentState, setAgentState] = useState<AgentState>({
+    emails: [], calendar: [], lastRun: null, error: null, agentRunning: false,
+  });
   const [selected, setSelected] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("all");
-  const [agentRunning, setAgentRunning] = useState(false);
-  const [lastRun, setLastRun] = useState<string | null>(null);
-  const [activeAccount, setActiveAccount] = useState<string>("all");
+  const [tab, setTab] = useState<"inbox" | "calendar">("inbox");
+  const [searchQ, setSearchQ] = useState("");
+  const [liveMode, setLiveMode] = useState(true);
+  const [triggering, setTriggering] = useState(false);
 
-  const visibleEmails = emails.filter(
-    (e) => activeAccount === "all" || e.accountId === activeAccount
+  const fetchState = useCallback(async () => {
+    try {
+      const res = await fetch(`${API}/state`);
+      if (!res.ok) throw new Error(`${res.status}`);
+      const data = await res.json();
+      setAgentState(data);
+      setLiveMode(true);
+    } catch {
+      setLiveMode(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchState();
+    const t = setInterval(fetchState, 30_000);
+    return () => clearInterval(t);
+  }, [fetchState]);
+
+  const handleRunAgent = async () => {
+    setTriggering(true);
+    try {
+      await fetch(`${API}/run`, { method: "POST" });
+      await new Promise((r) => setTimeout(r, 3000));
+      await fetchState();
+    } finally {
+      setTriggering(false);
+    }
+  };
+
+  const handleApprove = async (emailId: string, draft: string) => {
+    try {
+      await fetch(`${API}/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emailId, draft }),
+      });
+      await fetchState();
+    } catch (err) {
+      console.error("Send failed:", err);
+    }
+  };
+
+  const handleSkip = async (emailId: string) => {
+    await fetch(`${API}/skip`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ emailId }),
+    });
+    await fetchState();
+  };
+
+  const handleRedraft = async (emailId: string) => {
+    const res = await fetch(`${API}/redraft`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ emailId }),
+    });
+    const data = await res.json();
+    if (data.draft) {
+      setAgentState((prev) => ({
+        ...prev,
+        emails: prev.emails.map((e) =>
+          e.id === emailId ? { ...e, draft: data.draft } : e
+        ),
+      }));
+    }
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    await fetch(`${API}/calendar/${eventId}`, { method: "DELETE" });
+    setAgentState((prev) => ({
+      ...prev,
+      calendar: prev.calendar.filter((e) => e.id !== eventId),
+    }));
+  };
+
+  const emails = agentState.emails.filter((e) =>
+    searchQ
+      ? e.subject.toLowerCase().includes(searchQ.toLowerCase()) ||
+        e.fromName.toLowerCase().includes(searchQ.toLowerCase()) ||
+        e.from.toLowerCase().includes(searchQ.toLowerCase())
+      : true
   );
 
-  const selectedEmail = emails.find((e) => e.id === selected) ?? null;
-
-  const handleApprove = (id: string) =>
-    setEmails((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, status: "approved" as const } : e))
-    );
-
-  const handleSkip = (id: string) =>
-    setEmails((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, status: "no-reply" as const } : e))
-    );
-
-  const handleEdit = (id: string, draft: string) =>
-    setEmails((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, draft } : e))
-    );
-
-  const handleRunAgent = () => {
-    setAgentRunning(true);
-    setTimeout(() => {
-      setAgentRunning(false);
-      setLastRun(new Date().toISOString());
-      setEmails((prev) =>
-        prev.map((e) =>
-          e.status === "unread" ? { ...e, status: "draft-ready" as const } : e
-        )
-      );
-    }, 2800);
-  };
+  const selectedEmail = agentState.emails.find((e) => e.id === selected) ?? null;
+  const draftsCount = emails.filter((e) => e.status === "draft-ready").length;
+  const leadsCount  = emails.filter((e) => e.category === "lead").length;
 
   return (
     <div className="min-h-screen bg-ink-950 pt-24 pb-16">
@@ -699,183 +512,208 @@ export default function EmailAgent() {
             Email Agent
           </h1>
           <p className="mt-2 text-ink-200 max-w-xl">
-            Reads every inbox, classifies emails, drafts replies — you only click Approve.
+            Reads every inbox, classifies emails with AI, drafts replies — you only click Approve.
           </p>
         </div>
 
-        {/* Connected accounts */}
-        <div className="mb-6 flex flex-wrap gap-3">
-          <button
-            onClick={() => setActiveAccount("all")}
-            className={cn(
-              "px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors",
-              activeAccount === "all"
-                ? "bg-texas-500/10 border-texas-500/40 text-texas-500"
-                : "bg-white/3 border-white/10 text-ink-200 hover:text-white"
-            )}
-          >
-            All Accounts
-          </button>
-          {ACCOUNTS.map((acc) => (
-            <button
-              key={acc.id}
-              onClick={() => setActiveAccount(acc.id)}
-              className={cn(
-                "px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors flex items-center gap-2",
-                activeAccount === acc.id
-                  ? "bg-texas-500/10 border-texas-500/40 text-texas-500"
-                  : "bg-white/3 border-white/10 text-ink-200 hover:text-white"
-              )}
-            >
-              <div className="size-2 rounded-full bg-green-500" />
-              <span className="truncate max-w-[180px]">{acc.email}</span>
-              <span
-                className={cn(
-                  "text-xs px-1.5 py-0.5 rounded font-mono",
-                  acc.provider === "outlook"
-                    ? "bg-blue-600/20 text-blue-300"
-                    : "bg-red-600/20 text-red-300"
+        {/* Status bar */}
+        <div className="rounded-xl border border-white/10 bg-white/3 px-5 py-4 mb-6 flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-3">
+            <div className={cn("size-2.5 rounded-full", liveMode ? "bg-green-500 animate-pulse" : "bg-red-500")} />
+            <div>
+              <div className="text-sm font-semibold text-white flex items-center gap-2">
+                Email Agent
+                {!liveMode && (
+                  <span className="flex items-center gap-1 text-xs text-red-400 font-normal">
+                    <WifiOff className="size-3" /> Agent offline
+                  </span>
                 )}
-              >
-                {acc.provider === "outlook" ? "OL" : "GM"}
-              </span>
-              {acc.unread > 0 && (
-                <span className="size-4 text-xs bg-texas-500 text-white rounded-full flex items-center justify-center font-bold">
-                  {acc.unread}
-                </span>
-              )}
-            </button>
-          ))}
-          <button className="px-3 py-1.5 rounded-lg border border-dashed border-white/20 text-sm text-ink-200 hover:text-white hover:border-white/40 transition-colors">
-            + Add Account
-          </button>
-        </div>
-
-        {/* Agent status bar */}
-        <div className="mb-6">
-          <AgentStatusBar
-            emails={visibleEmails}
-            running={agentRunning}
-            onRun={handleRunAgent}
-            lastRun={lastRun}
-          />
-        </div>
-
-        {/* Main layout: list + thread viewer */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
-          {/* Email list */}
-          <div className="lg:col-span-2 rounded-xl border border-white/10 bg-white/3 flex flex-col overflow-hidden">
-            {/* Filter tabs */}
-            <div className="flex border-b border-white/5 overflow-x-auto">
-              {FILTER_TABS.map(({ key, label, icon: Icon }) => (
-                <button
-                  key={key}
-                  onClick={() => setFilter(key)}
-                  className={cn(
-                    "flex items-center gap-1.5 px-4 py-3 text-xs font-medium uppercase tracking-wider whitespace-nowrap transition-colors border-b-2",
-                    filter === key
-                      ? "text-texas-500 border-texas-500"
-                      : "text-ink-200 border-transparent hover:text-white"
-                  )}
-                >
-                  <Icon className="size-3.5" />
-                  {label}
-                  {key === "draft-ready" && (
-                    <span className="ml-1 bg-blue-400/20 text-blue-300 text-xs px-1.5 rounded-full">
-                      {visibleEmails.filter((e) => e.status === "draft-ready").length}
-                    </span>
-                  )}
-                </button>
-              ))}
+              </div>
+              <div className="text-xs text-ink-200">
+                {agentState.lastRun ? `Last run ${relativeTime(agentState.lastRun)}` : "Not yet run"}
+              </div>
             </div>
-
-            {agentRunning ? (
-              <div className="flex-1 flex flex-col items-center justify-center py-16 gap-4">
-                <RefreshCw className="size-8 text-texas-500 animate-spin" />
-                <div className="text-center">
-                  <div className="text-sm font-medium text-white mb-1">Agent Processing…</div>
-                  <div className="text-xs text-ink-200">Reading inboxes · Classifying · Drafting replies</div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex-1 overflow-y-auto">
-                <EmailList
-                  emails={visibleEmails}
-                  selected={selected}
-                  onSelect={setSelected}
-                  filter={filter}
-                />
-              </div>
-            )}
           </div>
 
-          {/* Thread viewer */}
-          <div className="lg:col-span-3 rounded-xl border border-white/10 bg-white/3 min-h-[480px] flex flex-col">
-            {selectedEmail ? (
-              <ThreadViewer
-                email={selectedEmail}
-                onApprove={handleApprove}
-                onSkip={handleSkip}
-                onEdit={handleEdit}
-              />
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center gap-3 text-ink-200/50 py-16">
-                <MailOpen className="size-12" />
-                <div className="text-sm">Select an email to view</div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Domain manager */}
-        <DomainManager />
-
-        {/* Setup instructions */}
-        <div className="mt-6 rounded-xl border border-white/10 bg-white/3 p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Bot className="size-4 text-texas-500" />
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider">
-              Add More Accounts
-            </h3>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+          <div className="flex items-center gap-6 flex-1">
             {[
-              {
-                icon: "📧",
-                title: "Gmail",
-                desc: "info@dfwhome.loans connected via Google MCP",
-                status: "Connected",
-                color: "text-green-400",
-              },
-              {
-                icon: "📨",
-                title: "Outlook / Microsoft 365",
-                desc: "tony@nofluffmarketing.onmicrosoft.com connected",
-                status: "Connected",
-                color: "text-green-400",
-              },
-              {
-                icon: "➕",
-                title: "Additional Accounts",
-                desc: "Connect more Gmail or Outlook accounts in MCP settings",
-                status: "Available",
-                color: "text-ink-200",
-              },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className="bg-white/5 rounded-lg p-4 border border-white/5"
-              >
-                <div className="text-2xl mb-2">{item.icon}</div>
-                <div className="font-medium text-white mb-1">{item.title}</div>
-                <div className="text-xs text-ink-200 mb-2">{item.desc}</div>
-                <span className={cn("text-xs font-medium", item.color)}>
-                  {item.status}
-                </span>
+              { label: "Total",   value: emails.length,   color: "text-white"        },
+              { label: "Drafts",  value: draftsCount,     color: "text-blue-400"     },
+              { label: "Leads",   value: leadsCount,      color: "text-texas-500"    },
+              { label: "Sent",    value: emails.filter((e) => e.status === "sent").length, color: "text-green-400" },
+            ].map(({ label, value, color }) => (
+              <div key={label} className="text-center">
+                <div className={cn("text-xl font-bold", color)}>{value}</div>
+                <div className="text-xs text-ink-200">{label}</div>
               </div>
             ))}
           </div>
+
+          <Button
+            onClick={handleRunAgent}
+            disabled={triggering || agentState.agentRunning}
+            className="bg-texas-500 hover:bg-texas-500/90 text-white"
+          >
+            {triggering || agentState.agentRunning ? (
+              <><RefreshCw className="size-4 mr-2 animate-spin" />Running…</>
+            ) : (
+              <><RefreshCw className="size-4 mr-2" />Run Agent</>
+            )}
+          </Button>
         </div>
+
+        {agentState.error && (
+          <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-400 flex items-center gap-2">
+            <AlertCircle className="size-4 flex-shrink-0" />
+            {agentState.error}
+          </div>
+        )}
+
+        {/* Tab switcher */}
+        <div className="flex gap-1 mb-5 border-b border-white/10 pb-0">
+          {[
+            { key: "inbox" as const,    label: "Inbox",    icon: Mail      },
+            { key: "calendar" as const, label: "Calendar", icon: Calendar  },
+          ].map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => setTab(key)}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors",
+                tab === key
+                  ? "text-texas-500 border-texas-500"
+                  : "text-ink-200 border-transparent hover:text-white"
+              )}
+            >
+              <Icon className="size-4" />
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {tab === "inbox" && (
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            {/* Left: email list */}
+            <div className="lg:col-span-2 rounded-xl border border-white/10 bg-white/3 flex flex-col overflow-hidden">
+              {/* Search */}
+              <div className="p-3 border-b border-white/5">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-ink-200/50" />
+                  <input
+                    value={searchQ}
+                    onChange={(e) => setSearchQ(e.target.value)}
+                    placeholder="Search emails…"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-sm text-white placeholder-ink-200/40 focus:outline-none focus:border-texas-500/50"
+                  />
+                </div>
+              </div>
+
+              {/* Filter tabs */}
+              <div className="flex border-b border-white/5 overflow-x-auto">
+                {FILTER_TABS.map(({ key, label, icon: Icon }) => (
+                  <button
+                    key={key}
+                    onClick={() => setFilter(key)}
+                    className={cn(
+                      "flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium uppercase tracking-wider whitespace-nowrap transition-colors border-b-2",
+                      filter === key ? "text-texas-500 border-texas-500" : "text-ink-200 border-transparent hover:text-white"
+                    )}
+                  >
+                    <Icon className="size-3.5" />
+                    {label}
+                    {key === "draft-ready" && draftsCount > 0 && (
+                      <span className="ml-1 bg-blue-400/20 text-blue-300 text-xs px-1.5 rounded-full">
+                        {draftsCount}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex-1 overflow-y-auto">
+                {(triggering || agentState.agentRunning) ? (
+                  <div className="flex flex-col items-center justify-center py-16 gap-4">
+                    <RefreshCw className="size-8 text-texas-500 animate-spin" />
+                    <div className="text-center">
+                      <div className="text-sm font-medium text-white mb-1">Agent Processing…</div>
+                      <div className="text-xs text-ink-200">Reading inbox · Classifying · Drafting</div>
+                    </div>
+                  </div>
+                ) : (
+                  <EmailList
+                    emails={emails}
+                    selected={selected}
+                    onSelect={setSelected}
+                    filter={filter}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Right: thread viewer */}
+            <div className="lg:col-span-3 rounded-xl border border-white/10 bg-white/3 min-h-[520px] flex flex-col">
+              {selectedEmail ? (
+                <ThreadViewer
+                  email={selectedEmail}
+                  onApprove={handleApprove}
+                  onSkip={handleSkip}
+                  onRedraft={handleRedraft}
+                />
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center gap-3 text-ink-200/50 py-16">
+                  <MailOpen className="size-12" />
+                  <div className="text-sm">Select an email to view</div>
+                  {!liveMode && (
+                    <div className="text-xs text-red-400/70 max-w-xs text-center mt-2">
+                      Agent server is offline. Run <code className="bg-white/5 px-1 rounded">npm start</code> in <code className="bg-white/5 px-1 rounded">/server</code> to connect.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {tab === "calendar" && (
+          <div className="rounded-xl border border-white/10 bg-white/3 overflow-hidden">
+            <div className="px-5 py-4 border-b border-white/5 flex items-center gap-3">
+              <Calendar className="size-4 text-texas-500" />
+              <h3 className="text-sm font-semibold text-white uppercase tracking-wider">
+                Upcoming Events · Next 14 Days
+              </h3>
+              <span className="ml-auto text-xs text-ink-200">
+                {agentState.calendar.length} events
+              </span>
+            </div>
+            <CalendarPanel
+              events={agentState.calendar}
+              onDelete={handleDeleteEvent}
+            />
+          </div>
+        )}
+
+        {/* Setup instructions — shown when agent is offline */}
+        {!liveMode && (
+          <div className="mt-6 rounded-xl border border-white/10 bg-white/3 p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Bot className="size-4 text-texas-500" />
+              <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Start the Agent</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+              {[
+                { step: "1", title: "Configure credentials", desc: 'Copy server/.env.example → server/.env, fill in ANTHROPIC_API_KEY and OUTLOOK_ACCESS_TOKEN' },
+                { step: "2", title: "Install & start", desc: 'cd server && npm install && npm start — runs on port 3001' },
+                { step: "3", title: "Agent connects", desc: 'Dashboard auto-connects. Emails load, AI drafts generate, calendar syncs every 5 minutes.' },
+              ].map((s) => (
+                <div key={s.step} className="bg-white/5 rounded-lg p-4 border border-white/5">
+                  <div className="size-6 rounded-full bg-texas-500/20 text-texas-500 text-xs font-bold flex items-center justify-center mb-2">{s.step}</div>
+                  <div className="font-medium text-white mb-1 text-xs uppercase tracking-wider">{s.title}</div>
+                  <div className="text-xs text-ink-200">{s.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
