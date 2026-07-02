@@ -45,7 +45,6 @@ public/
 | -------------------- | ------------------------ |
 | `/`                  | Home                     |
 | `/dead-database`     | Dead Database Reactivation |
-| `/listing-sentinel`  | ListingSentinel AI         |
 | `/about`             | About Tony Botchev         |
 | `/privacy`           | Privacy policy             |
 | `/terms`             | Terms of service           |

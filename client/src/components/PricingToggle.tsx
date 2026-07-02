@@ -47,7 +47,6 @@ const TIERS: Tier[] = [
       "AI voice agent (inbound + outbound)",
       "Dead Database Reactivation included",
       "5,000 contacts",
-      "ListingSentinel Lite (25 alerts/mo)",
       "Missed-call text-back",
       "Priority support",
     ],
@@ -61,7 +60,6 @@ const TIERS: Tier[] = [
     tagline: "For the operator building a real brokerage-grade engine.",
     features: [
       "Everything in Growth",
-      "ListingSentinel Pro (unlimited zips)",
       "Answer Engine Optimization (AEO) program",
       "4 listing reels per month",
       "Social media management (3 platforms)",

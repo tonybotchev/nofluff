@@ -49,11 +49,6 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/listing-sentinel" className="hover:text-white">
-                  ListingSentinel AI
-                </Link>
-              </li>
-              <li>
                 <Link to="/#services" className="hover:text-white">
                   Answer Engine Optimization
                 </Link>

@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import {
   ArrowRight,
   Bot,
-  Radar,
   Sparkles,
   Film,
   Share2,
@@ -27,7 +26,6 @@ import {
   serviceAeo,
   serviceDeadDatabase,
   serviceListingReels,
-  serviceListingSentinel,
   serviceSaasCrm,
   serviceSocialMedia,
 } from "@/lib/schema";
@@ -46,13 +44,6 @@ const SERVICES = [
     href: "/dead-database",
     blurb:
       "AI voice agents call your cold list 24/7 using your name. Appointments land on your calendar while you sleep.",
-  },
-  {
-    icon: Radar,
-    name: "ListingSentinel AI",
-    href: "/listing-sentinel",
-    blurb:
-      "Pre-MLS property intelligence across Dallas, Collin, Denton, and Tarrant counties. Know who's about to sell before the sign goes up.",
   },
   {
     icon: Sparkles,
@@ -77,11 +68,17 @@ const SERVICES = [
   },
 ];
 
-const STATS = [
-  { end: 47293, label: "DFW properties monitored", suffix: "+" },
+const STATS: Array<{
+  end: number;
+  label: string;
+  prefix?: string;
+  suffix?: string;
+  note?: string;
+}> = [
   { end: 87, label: "Average dead-list conversion rate", suffix: "%", note: "within 30 days" },
   { end: 24, label: "Hour listing-reel turnaround", suffix: "hr" },
-  { end: 4, label: "Counties covered by Listing Sentinel" },
+  { end: 7, label: "Day free trial on Dead Database Reactivation", note: "$0 setup" },
+  { end: 97, label: "Per listing reel — no filming required", prefix: "$" },
 ];
 
 export default function Home() {
@@ -89,7 +86,6 @@ export default function Home() {
     ...allPrimarySchemas,
     serviceSaasCrm,
     serviceDeadDatabase,
-    serviceListingSentinel,
     serviceAeo,
     serviceListingReels,
     serviceSocialMedia,
@@ -104,7 +100,7 @@ export default function Home() {
     <>
       <SEOHead
         title="AI Revenue Systems for DFW Real Estate & Mortgage"
-        description="NoFluff Marketing builds AI-powered CRM, voice agents, and pre-MLS property intelligence for DFW agents and loan officers. Built by a licensed practitioner, NMLS #114198. No fluff. Just results."
+        description="NoFluff Marketing builds AI-powered CRM, voice agents, and done-for-you content for DFW agents and loan officers. Built by a licensed practitioner, NMLS #114198. No fluff. Just results."
         path="/"
         jsonLd={jsonLd}
       />
@@ -127,9 +123,9 @@ export default function Home() {
             </h1>
             <p className="text-lg text-ink-200 leading-relaxed max-w-xl mb-8 fade-up">
               NoFluff Marketing builds the AI-powered revenue systems DFW real
-              estate agents and mortgage pros actually need — CRM, voice agents,
-              pre-MLS intelligence, and content that closes. No guru fluff. No
-              vaporware. Just the operator's playbook.
+              estate agents and mortgage pros actually need — CRM, voice
+              agents, and content that closes. No guru fluff. No vaporware.
+              Just the operator's playbook.
             </p>
             <div className="flex flex-wrap gap-3 fade-up">
               <Button asChild size="lg">
@@ -154,7 +150,7 @@ export default function Home() {
             <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-texas-500/20 to-transparent blur-2xl" />
             <div className="relative rounded-2xl border border-white/8 bg-ink-900/70 p-6 backdrop-blur-sm">
               <p className="text-xs font-display tracking-[0.2em] text-texas-500 mb-5">
-                LIVE SYSTEM · DFW
+                BY THE NUMBERS · DFW
               </p>
               <div className="grid grid-cols-2 gap-3">
                 {STATS.map((s) => (
@@ -164,6 +160,7 @@ export default function Home() {
                   >
                     <AnimatedCounter
                       end={s.end}
+                      prefix={s.prefix ?? ""}
                       suffix={s.suffix ?? ""}
                       className="font-display text-3xl text-white tabular-nums block"
                     />
@@ -188,6 +185,7 @@ export default function Home() {
             <div key={s.label + "-strip"}>
               <AnimatedCounter
                 end={s.end}
+                prefix={s.prefix ?? ""}
                 suffix={s.suffix ?? ""}
                 className="font-display text-4xl text-texas-500 tabular-nums"
               />
@@ -205,7 +203,7 @@ export default function Home() {
               WHAT WE BUILD
             </p>
             <h2 className="text-4xl md:text-6xl mb-5 text-balance">
-              Six systems. One operator's stack.
+              Five systems. One operator's stack.
             </h2>
             <p className="text-lg text-ink-300 leading-relaxed">
               Every tool here runs in Tony's own DFW mortgage business first.

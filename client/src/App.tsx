@@ -4,7 +4,6 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import Home from "@/pages/Home";
 import DeadDatabase from "@/pages/DeadDatabase";
-import ListingSentinelPage from "@/pages/ListingSentinelPage";
 import About from "@/pages/About";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
@@ -33,7 +32,6 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/dead-database" element={<DeadDatabase />} />
-          <Route path="/listing-sentinel" element={<ListingSentinelPage />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />

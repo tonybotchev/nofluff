@@ -156,16 +156,6 @@ export const serviceDeadDatabase = {
   url: `${SITE_URL}/dead-database`,
 };
 
-export const serviceListingSentinel = {
-  ...serviceBase,
-  "@id": `${SITE_URL}/#service-listing-sentinel`,
-  name: "ListingSentinel AI",
-  serviceType: "Real Estate Intelligence",
-  description:
-    "AI-powered public-records monitoring for Dallas, Collin, Denton, and Tarrant counties — identifies likely-to-list properties before they hit the MLS.",
-  url: `${SITE_URL}/listing-sentinel`,
-};
-
 export const serviceAeo = {
   ...serviceBase,
   "@id": `${SITE_URL}/#service-aeo`,
@@ -226,7 +216,7 @@ export const productGrowth = {
   "@id": `${SITE_URL}/#plan-growth`,
   name: "NoFluff Growth",
   description:
-    "Everything in Starter + AI voice agent, dead-lead reactivation, 5,000 contacts, ListingSentinel Lite.",
+    "Everything in Starter + AI voice agent, dead-lead reactivation, 5,000 contacts.",
   offers: {
     "@type": "Offer",
     price: "297",
@@ -247,7 +237,7 @@ export const productPro = {
   "@id": `${SITE_URL}/#plan-pro`,
   name: "NoFluff Pro",
   description:
-    "Everything in Growth + ListingSentinel Pro, AEO program, 4 listing reels/mo, unlimited contacts, dedicated strategist.",
+    "Everything in Growth + AEO program, 4 listing reels/mo, unlimited contacts, dedicated strategist.",
   offers: {
     "@type": "Offer",
     price: "497",
@@ -272,7 +262,7 @@ export const faqSchema = {
       name: "What does NoFluff Marketing actually do?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "We build AI-powered revenue systems for DFW real estate agents and mortgage pros — a full CRM, AI voice agents that re-engage dead leads, Listing Sentinel for pre-MLS property intelligence, Answer Engine Optimization, and done-for-you listing reels.",
+        text: "We build AI-powered revenue systems for DFW real estate agents and mortgage pros — a full CRM, AI voice agents that re-engage dead leads, Answer Engine Optimization, and done-for-you listing reels.",
       },
     },
     {
@@ -281,14 +271,6 @@ export const faqSchema = {
       acceptedAnswer: {
         "@type": "Answer",
         text: "The AI agent calls your dead database 24/7 using your name and voice, handles objections, and only routes warm, qualified prospects to your calendar. No salary, no burnout, no no-shows from a human VA.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "What is ListingSentinel AI?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "It's a proprietary system that monitors public records across Dallas, Collin, Denton, and Tarrant counties — divorces, probates, tax delinquencies, expired listings, rental conversions — and alerts you to likely sellers before the property ever hits the MLS.",
       },
     },
     {
@@ -304,7 +286,7 @@ export const faqSchema = {
       name: "Do you only serve the DFW area?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "The CRM, listing reels, and AEO programs work nationally. Listing Sentinel and our dead-database scripts are DFW-optimized because the owner, Tony Botchev, is a licensed DFW loan originator (NMLS #114198) who uses these exact systems in his own business.",
+        text: "The CRM, listing reels, and AEO programs work nationally. Our dead-database scripts are DFW-optimized because the owner, Tony Botchev, is a licensed DFW loan originator (NMLS #114198) who uses these exact systems in his own business.",
       },
     },
     {

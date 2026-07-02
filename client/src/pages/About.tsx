@@ -66,11 +66,10 @@ export default function About() {
               .
             </p>
             <p className="text-lg text-ink-100 leading-relaxed mb-6">
-              Every tool we sell — the CRM, the AI voice agent, ListingSentinel,
-              the listing-reel workflow — was born out of a problem he hit in
-              his own pipeline. The AI caller came from a dead database of
-              2,300 leads he refused to let die. ListingSentinel came from
-              watching competitors win listings he should have seen coming.
+              Every tool we sell — the CRM, the AI voice agent, the
+              listing-reel workflow — was born out of a problem he hit in his
+              own pipeline. The AI caller came from a dead database of 2,300
+              leads he refused to let die.
             </p>
             <p className="text-lg text-ink-100 leading-relaxed mb-6">
               NoFluff only exists because other DFW agents kept asking him how

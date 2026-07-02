@@ -8,7 +8,6 @@ import { PHONE, PHONE_DISPLAY } from "@/lib/schema";
 const NAV_LINKS = [
   { to: "/#services", label: "Services" },
   { to: "/dead-database", label: "Dead Database" },
-  { to: "/listing-sentinel", label: "Listing Sentinel" },
   { to: "/#pricing", label: "Pricing" },
   { to: "/about", label: "About" },
 ];
