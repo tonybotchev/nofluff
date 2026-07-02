@@ -12,7 +12,6 @@ import { SentinelDashboard } from "@/components/SentinelDashboard";
 import {
   breadcrumbList,
   serviceListingSentinel,
-  SITE_URL,
 } from "@/lib/schema";
 import { cn } from "@/lib/utils";
 
@@ -101,7 +100,6 @@ export default function ListingSentinelPage() {
         description="AI-powered public-records monitoring across Dallas, Collin, Denton, and Tarrant counties. Identify likely sellers before they list. Join the DFW waitlist."
         path="/listing-sentinel"
         jsonLd={jsonLd}
-        image={`${SITE_URL}/logo-dark.svg`}
       />
 
       {/* HERO */}

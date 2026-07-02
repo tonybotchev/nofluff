@@ -13,7 +13,6 @@ import {
   breadcrumbList,
   howToSchema,
   serviceDeadDatabase,
-  SITE_URL,
 } from "@/lib/schema";
 import { cn } from "@/lib/utils";
 
@@ -97,7 +96,6 @@ export default function DeadDatabase() {
         description="Turn your cold list into booked appointments. NoFluff's AI voice agent calls your dead real-estate and mortgage leads 24/7 using your name. $0 setup, 7-day free trial."
         path="/dead-database"
         jsonLd={jsonLd}
-        image={`${SITE_URL}/logo-dark.svg`}
       />
 
       {/* HERO */}

@@ -48,7 +48,7 @@ export function SEOHead({
 }: SEOHeadProps) {
   useEffect(() => {
     const canonical = `${SITE_URL}${path}`;
-    const ogImage = image ?? `${SITE_URL}/logo-dark.svg`;
+    const ogImage = image ?? `${SITE_URL}/og-image.png`;
     const fullTitle = title.includes(SITE_NAME)
       ? title
       : `${title} | ${SITE_NAME}`;

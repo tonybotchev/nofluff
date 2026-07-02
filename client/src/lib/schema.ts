@@ -24,8 +24,8 @@ export const organizationSchema = {
   logo: {
     "@type": "ImageObject",
     url: `${SITE_URL}/logo-dark.svg`,
-    width: 512,
-    height: 128,
+    width: 480,
+    height: 96,
   },
   email: EMAIL,
   telephone: PHONE,
@@ -52,7 +52,7 @@ export const localBusinessSchema = {
   "@type": "LocalBusiness",
   "@id": `${SITE_URL}/#localbusiness`,
   name: LEGAL_NAME,
-  image: `${SITE_URL}/logo-dark.svg`,
+  image: `${SITE_URL}/og-image.png`,
   url: SITE_URL,
   telephone: PHONE,
   email: EMAIL,
@@ -123,14 +123,6 @@ export const websiteSchema = {
   description:
     "AI-powered revenue systems for DFW real estate agents and mortgage professionals.",
   publisher: { "@id": `${SITE_URL}/#organization` },
-  potentialAction: {
-    "@type": "SearchAction",
-    target: {
-      "@type": "EntryPoint",
-      urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
-    },
-    "query-input": "required name=search_term_string",
-  },
   inLanguage: "en-US",
 };
 

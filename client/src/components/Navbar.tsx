@@ -69,13 +69,13 @@ export function Navbar() {
         <nav className="hidden lg:flex items-center gap-8">
           {NAV_LINKS.map((link) =>
             link.to.startsWith("/#") ? (
-              <a
+              <Link
                 key={link.to}
-                href={link.to}
+                to={link.to}
                 className="text-sm font-medium uppercase tracking-[0.12em] text-ink-200 transition-colors hover:text-white"
               >
                 {link.label}
-              </a>
+              </Link>
             ) : (
               <NavLink
                 key={link.to}
@@ -102,7 +102,7 @@ export function Navbar() {
             {PHONE_DISPLAY}
           </a>
           <Button asChild size="sm">
-            <a href="#contact">Schedule a Demo</a>
+            <Link to="/#contact">Schedule a Demo</Link>
           </Button>
         </div>
 
@@ -119,32 +119,23 @@ export function Navbar() {
 
       <div
         className={cn(
-          "lg:hidden fixed inset-x-0 top-[68px] bottom-0 bg-ink-950/98 backdrop-blur-xl border-t border-white/5 transition-opacity",
+          "lg:hidden absolute inset-x-0 top-full h-[calc(100dvh-100%)] bg-ink-950/98 backdrop-blur-xl border-t border-white/5 transition-opacity overflow-y-auto",
           open
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
         )}
       >
         <nav className="flex flex-col p-6 gap-1">
-          {NAV_LINKS.map((link) =>
-            link.to.startsWith("/#") ? (
-              <a
-                key={link.to}
-                href={link.to}
-                className="py-4 text-2xl font-display tracking-wider uppercase text-white border-b border-white/5"
-              >
-                {link.label}
-              </a>
-            ) : (
-              <Link
-                key={link.to}
-                to={link.to}
-                className="py-4 text-2xl font-display tracking-wider uppercase text-white border-b border-white/5"
-              >
-                {link.label}
-              </Link>
-            )
-          )}
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              onClick={() => setOpen(false)}
+              className="py-4 text-2xl font-display tracking-wider uppercase text-white border-b border-white/5"
+            >
+              {link.label}
+            </Link>
+          ))}
           <div className="mt-8 flex flex-col gap-3">
             <a
               href={`tel:${PHONE}`}
@@ -154,7 +145,9 @@ export function Navbar() {
               {PHONE_DISPLAY}
             </a>
             <Button asChild size="lg" className="w-full">
-              <a href="#contact">Schedule a Demo</a>
+              <Link to="/#contact" onClick={() => setOpen(false)}>
+                Schedule a Demo
+              </Link>
             </Button>
           </div>
         </nav>

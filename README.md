@@ -34,6 +34,7 @@ public/
   logo-dark.svg        White + orange, for dark bg
   logo-light.svg       Charcoal + orange, for light bg
   logo-icon.svg        Icon mark only
+  og-image.png         1200×630 social share image
   sitemap.xml
   robots.txt           Allows GPTBot, ClaudeBot, Googlebot, …
 ```

@@ -9,7 +9,6 @@ const HOT_ZIPS = ["75009", "75034", "75035"];
 export function SentinelDashboard() {
   const [monitored, setMonitored] = useState(BASE_MONITORED);
   const [alerts, setAlerts] = useState(BASE_ALERTS);
-  const [pulseKey, setPulseKey] = useState(0);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -18,7 +17,6 @@ export function SentinelDashboard() {
         const delta = Math.random() > 0.6 ? 1 : 0;
         return a + delta;
       });
-      setPulseKey((k) => k + 1);
     }, 5000);
     return () => clearInterval(id);
   }, []);
@@ -46,7 +44,6 @@ export function SentinelDashboard() {
         <DashboardCard
           icon={<Activity className="size-4" />}
           label="Properties Monitored"
-          key1={pulseKey}
         >
           <AnimatedCounter
             end={monitored}
@@ -58,10 +55,12 @@ export function SentinelDashboard() {
         <DashboardCard
           icon={<Bell className="size-4" />}
           label="Alerts This Week"
-          key1={pulseKey}
           accent
         >
-          <span className="font-display text-4xl md:text-5xl text-texas-400 tabular-nums">
+          <span
+            key={alerts}
+            className="fade-up inline-block font-display text-4xl md:text-5xl text-texas-400 tabular-nums"
+          >
             {alerts}
           </span>
         </DashboardCard>
@@ -99,13 +98,11 @@ function DashboardCard({
   label,
   children,
   accent,
-  key1,
 }: {
   icon: React.ReactNode;
   label: string;
   children: React.ReactNode;
   accent?: boolean;
-  key1: number;
 }) {
   return (
     <div
@@ -120,9 +117,7 @@ function DashboardCard({
         {icon}
         <p className="text-[11px] font-display tracking-[0.2em]">{label}</p>
       </div>
-      <div key={key1} className="fade-up">
-        {children}
-      </div>
+      <div>{children}</div>
     </div>
   );
 }

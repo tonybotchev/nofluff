@@ -39,6 +39,11 @@
     scroll-behavior: smooth;
   }
 
+  /* Keep anchored sections clear of the fixed navbar */
+  [id] {
+    scroll-margin-top: 5rem;
+  }
+
   body {
     margin: 0;
     font-family: var(--font-sans);
